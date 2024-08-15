@@ -2,31 +2,57 @@
 <button id="toggleModal" class="bg-blue-500 text-white px-4 py-2 rounded">Add New Complaint</button>
 <h3 class="text-lg font-bold mt-8">Existing Complaints</h3>
 
-<?php
-// Retrieve sorting choice from query parameter (default to showing Status 2 first)
-$sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'pending';
+<div class="mb-4">
+    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex space-x-2">
+        <!-- Menyimpan nilai halaman saat ini -->
+        <input type="hidden" name="page" value="<?php echo htmlspecialchars($current_page); ?>">
 
-// Separate complaints into two arrays
-$inProgressAduans = array_filter($aduans, fn($aduan) => $aduan['Status'] == 2);
-$pendingAduans = array_filter($aduans, fn($aduan) => $aduan['Status'] == 3);
+        <!-- Menyimpan nilai filter bulan jika ada -->
+        <input type="hidden" name="month" value="<?php echo htmlspecialchars($selectedMonth); ?>">
 
-// Merge arrays based on sorting choice
-if ($sortOrder === 'pending') {
-    $sortedAduans = array_merge($pendingAduans, $inProgressAduans);
-} else {
-    $sortedAduans = array_merge($inProgressAduans, $pendingAduans);
-}
+        <!-- Menyimpan nilai filter tahun jika ada -->
+        <input type="hidden" name="year" value="<?php echo htmlspecialchars($selectedYear); ?>">
 
-// URL with token
-$urlWithToken = 'dashboard?key=' . urlencode($_SESSION['token']);
-$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-?>
+        <!-- Tombol untuk menyortir berdasarkan status pending -->
+        <button type="submit" name="sort" value="pending" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">
+            Show Pending First
+        </button>
+
+        <!-- Tombol untuk menyortir berdasarkan status in-progress -->
+        <button type="submit" name="sort" value="in-progress" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm">
+            Show In-Progress First
+        </button>
+
+        <!-- Menyimpan token untuk keamanan -->
+        <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
+    </form>
+</div>
+
 
 <div class="mb-4">
     <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex space-x-2">
-        <input type="hidden" name="page" value="<?php echo htmlspecialchars($current_page); ?>">
-        <button type="submit" name="sort" value="pending" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Show Pending First</button>
-        <button type="submit" name="sort" value="in-progress" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm">Show In-Progress First</button>
+        <select name="month" class="border border-gray-300 rounded-md">
+            <option value="">Select Month</option>
+            <?php for ($m = 1; $m <= 12; $m++) : ?>
+                <option value="<?php echo $m; ?>" <?php if (isset($_GET['month']) && $_GET['month'] == $m) echo 'selected'; ?>>
+                    <?php echo date('F', mktime(0, 0, 0, $m, 1)); ?>
+                </option>
+            <?php endfor; ?>
+        </select>
+
+        <select name="year" class="border border-gray-300 rounded-md">
+            <option value="">Select Year</option>
+            <?php
+            $startYear = date('Y') - 5; // Adjust range as needed
+            $endYear = date('Y');
+            for ($y = $startYear; $y <= $endYear; $y++) : ?>
+                <option value="<?php echo $y; ?>" <?php if (isset($_GET['year']) && $_GET['year'] == $y) echo 'selected'; ?>>
+                    <?php echo $y; ?>
+                </option>
+            <?php endfor; ?>
+        </select>
+
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Filter</button>
         <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
     </form>
 </div>
@@ -50,57 +76,63 @@ $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($sortedAduans as $aduan) : ?>
-                <tr class="hover:bg-gray-200 border-b-2 border-gray-300">
-                    <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['artifact_id']); ?></td>
-                    <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['nama_pengadu']); ?></td>
-                    <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['title_aduan']); ?></td>
-                    <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['tempat_aduan']); ?></td>
-                    <td class="py-2 px-4">
-                        <?php
-                        $pic = array_filter($pics, fn($p) => $p['id_pic'] == $aduan['PIC']);
-                        echo $pic ? reset($pic)['kode_pic'] : 'N/A';
-                        ?>
-                    </td>
-                    <td class="py-2 px-4">
-                        <?php
-                        $koordinator = array_filter($koordinators, fn($k) => $k['id_koordinator'] == $aduan['Koordinator']);
-                        echo $koordinator ? reset($koordinator)['kode_koordinator'] : 'N/A';
-                        ?>
-                    </td>
-                    <td class="py-2 px-4">
-                        <?php
-                        $status = array_filter($statuses, fn($s) => $s['id_status'] == $aduan['Status']);
-                        echo $status ? reset($status)['description'] : 'N/A';
-                        ?>
-                    </td>
-                    <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['Keterangan']); ?></td>
-                    <td class="py-2 px-4">
-                        <?php echo isset($aduan['Hasil_konfrimasi_teknisi']) ? htmlspecialchars($aduan['Hasil_konfrimasi_teknisi']) : 'N/A'; ?>
-                    </td>
-                    <td class="py-2 px-4">
-                        <?php echo isset($aduan['Teknisi_penindaklanjut_aduan']) ? htmlspecialchars($aduan['Teknisi_penindaklanjut_aduan']) : 'N/A'; ?>
-                    </td>
-                    <td class="py-2 px-4">
-                        <?php echo calculateAge($aduan['tanggal_aduan']); ?>
-                    </td>
-                    <td class="py-2 px-4 text-left block md:table-cell">
-                        <?php if ($_SESSION['role'] !== 'Technician') : ?>
-                            <div class="flex space-x-2">
-                                <form method="POST" action="" style="display:inline;" onsubmit="return confirmDelete();">
-                                    <input type="hidden" name="id_aduan" value="<?php echo htmlspecialchars($aduan['id_aduan']); ?>">
-                                    <button type="submit" name="delete" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm">
-                                        <i class="bi bi-trash text-base"></i>
+            <?php if ($aduans) : ?>
+                <?php foreach ($aduans as $aduan) : ?>
+                    <tr class="hover:bg-gray-200 border-b-2 border-gray-300">
+                        <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['artifact_id']); ?></td>
+                        <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['nama_pengadu']); ?></td>
+                        <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['title_aduan']); ?></td>
+                        <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['tempat_aduan']); ?></td>
+                        <td class="py-2 px-4">
+                            <?php
+                            $pic = array_filter($pics, fn($p) => $p['id_pic'] == $aduan['PIC']);
+                            echo $pic ? reset($pic)['kode_pic'] : 'N/A';
+                            ?>
+                        </td>
+                        <td class="py-2 px-4">
+                            <?php
+                            $koordinator = array_filter($koordinators, fn($k) => $k['id_koordinator'] == $aduan['Koordinator']);
+                            echo $koordinator ? reset($koordinator)['kode_koordinator'] : 'N/A';
+                            ?>
+                        </td>
+                        <td class="py-2 px-4">
+                            <?php
+                            $status = array_filter($statuses, fn($s) => $s['id_status'] == $aduan['Status']);
+                            echo $status ? reset($status)['description'] : 'N/A';
+                            ?>
+                        </td>
+                        <td class="py-2 px-4"><?php echo htmlspecialchars($aduan['Keterangan']); ?></td>
+                        <td class="py-2 px-4">
+                            <?php echo isset($aduan['Hasil_konfrimasi_teknisi']) ? htmlspecialchars($aduan['Hasil_konfrimasi_teknisi']) : 'N/A'; ?>
+                        </td>
+                        <td class="py-2 px-4">
+                            <?php echo isset($aduan['Teknisi_penindaklanjut_aduan']) ? htmlspecialchars($aduan['Teknisi_penindaklanjut_aduan']) : 'N/A'; ?>
+                        </td>
+                        <td class="py-2 px-4">
+                            <?php echo calculateAge($aduan['tanggal_aduan']); ?>
+                        </td>
+                        <td class="py-2 px-4 text-left block md:table-cell">
+                            <?php if ($_SESSION['role'] !== 'Technician') : ?>
+                                <div class="flex space-x-2">
+                                    <form method="POST" action="" style="display:inline;" onsubmit="return confirmDelete();">
+                                        <input type="hidden" name="id_aduan" value="<?php echo htmlspecialchars($aduan['id_aduan']); ?>">
+                                        <button type="submit" name="delete" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                    </form>
+                                    <button class="bg-yellow-500 text-white px-2 py-1 rounded-md shadow-sm" onclick="window.location.href='edit_complaint?id=<?php echo $aduan['id_aduan']; ?>&key=<?php echo htmlspecialchars($token); ?>'">
+                                        <i class="bi bi-pencil text-base"></i>
                                     </button>
-                                </form>
-                                <button class="bg-yellow-500 text-white px-2 py-1 rounded-md shadow-sm" onclick="window.location.href='edit_complaint?id=<?php echo $aduan['id_aduan']; ?>&key=<?php echo htmlspecialchars($token); ?>'">
-                                    <i class="bi bi-pencil text-base"></i>
-                                </button>
-                            </div>
-                        <?php endif; ?>
-                    </td>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <tr>
+                    <td colspan="12" class="text-center py-4">No data found for the selected month and year.</td>
                 </tr>
-            <?php endforeach; ?>
+            <?php endif; ?>
         </tbody>
     </table>
 </div>
@@ -108,15 +140,15 @@ $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 <!-- Pagination -->
 <div class="mt-6 flex justify-center space-x-2 mb-10">
     <?php if ($current_page > 1) : ?>
-        <a href="?page=<?php echo $current_page - 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Previous</a>
+        <a href="?page=<?php echo $current_page - 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Previous</a>
     <?php endif; ?>
 
     <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
-        <a href="?page=<?php echo $i; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-<?php echo $i == $current_page ? 'gray' : 'blue'; ?>-500 text-white px-4 py-2 rounded-md shadow-sm"><?php echo $i; ?></a>
+        <a href="?page=<?php echo $i; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-<?php echo $i == $current_page ? 'gray' : 'blue'; ?>-500 text-white px-4 py-2 rounded-md shadow-sm"><?php echo $i; ?></a>
     <?php endfor; ?>
 
     <?php if ($current_page < $total_pages) : ?>
-        <a href="?page=<?php echo $current_page + 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Next</a>
+        <a href="?page=<?php echo $current_page + 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Next</a>
     <?php endif; ?>
 </div>
 

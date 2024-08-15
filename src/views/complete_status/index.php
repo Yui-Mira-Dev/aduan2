@@ -28,7 +28,7 @@ function isTokenValid($token)
 $token = isset($_GET['key']) ? $_GET['key'] : '';
 
 if (!isset($_SESSION['id_user'], $_SESSION['username'], $_SESSION['role']) || !isTokenValid($token)) {
-    header('Location: index');
+    header('Location: /');
     exit();
 }
 
@@ -95,13 +95,20 @@ $sql = "SELECT
         ORDER BY da.id_aduan DESC
         LIMIT $limit OFFSET $offset";
 
-
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $aduan = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Handle Excel export
+// Handle Excel export for filtered data
 if (isset($_GET['export'])) {
+    $exportAll = false;
+} elseif (isset($_GET['export_all'])) {
+    $exportAll = true;
+    $startDate = null;
+    $endDate = null;
+}
+
+if (isset($_GET['export']) || isset($_GET['export_all'])) {
     // Create a new Spreadsheet object
     $spreadsheet = new Spreadsheet();
 
@@ -112,9 +119,17 @@ if (isset($_GET['export'])) {
                        SUM(CASE WHEN da.Status = 2 THEN 1 ELSE 0 END) AS in_progress,
                        SUM(CASE WHEN da.Status = 3 THEN 1 ELSE 0 END) AS pending
                    FROM daftar_aduan da
-                   WHERE DATE(da.tanggal_aduan) BETWEEN ? AND ?";
+                   WHERE 1=1";
+
+    if (!$exportAll) {
+        $summarySql .= " AND DATE(da.tanggal_aduan) BETWEEN ? AND ?";
+        $summaryParams = [$startDate, $endDate];
+    } else {
+        $summaryParams = [];
+    }
+
     $summaryStmt = $pdo->prepare($summarySql);
-    $summaryStmt->execute([$startDate, $endDate]);
+    $summaryStmt->execute($summaryParams);
     $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
 
     // Add data for each status
@@ -165,7 +180,7 @@ if (isset($_GET['export'])) {
 
         // Add filters
         $sheet->setCellValue('A10', 'Periode:');
-        $sheet->setCellValue('B10', $startDate . ' to ' . $endDate);
+        $sheet->setCellValue('B10', !$exportAll ? ($startDate . ' to ' . $endDate) : 'All Time');
 
         // Add table header
         $sheet->setCellValue('A12', 'No');
@@ -180,76 +195,102 @@ if (isset($_GET['export'])) {
         $sheet->setCellValue('J12', 'Status');
         $sheet->setCellValue('K12', 'Umur Aduan');
         $sheet->setCellValue('L12', 'Keterangan');
-        $sheet->setCellValue('M12', 'Hasil Konfrimasi Teknis');
+        $sheet->setCellValue('M12', 'Hasil Konfirmasi Teknisi');
         $sheet->setCellValue('N12', 'Teknisi Penindaklanjut Aduan');
+
         $sheet->getStyle('A12:N12')->getFont()->setBold(true);
-        $sheet->getStyle('A12:N12')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('D3D3D3'); // Light gray
-        $sheet->getStyle('A12:N12')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $dataSql = "SELECT * FROM daftar_aduan da WHERE da.Status = ? AND DATE(da.tanggal_aduan) BETWEEN ? AND ?";
-        $dataStmt = $pdo->prepare($dataSql);
-        $dataStmt->execute([$statusId, $startDate, $endDate]);
-        $data = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+        // Fetch data for each status
+        $filteredSql = "SELECT 
+                            da.id_aduan,
+                            da.artifact_id,
+                            da.tanggal_aduan,
+                            da.nama_pengadu,
+                            da.title_aduan,
+                            da.ext,
+                            da.tempat_aduan,
+                            da.PIC,
+                            da.Koordinator,
+                            da.Status,
+                            da.Umur_aduan,
+                            da.Keterangan,
+                            da.Hasil_konfrimasi_teknisi,
+                            da.Teknisi_penindaklanjut_aduan,
+                            s.description AS status_description,
+                            p.kode_pic AS pic_code,
+                            p.nama_pic AS pic_name,
+                            k.kode_koordinator AS koordinator_code,
+                            k.nama_koordinator AS koordinator_name
+                        FROM daftar_aduan da
+                        JOIN status s ON da.Status = s.id_status
+                        JOIN PIC p ON da.PIC = p.id_pic
+                        JOIN Koordinator k ON da.Koordinator = k.id_koordinator
+                        WHERE da.Status = ?";
 
-        $row = 13;
-        $num = 1;
-        foreach ($data as $datum) {
-            $sheet->setCellValue('A' . $row, $num++); // Nomor urut
-            $sheet->setCellValue('B' . $row, $datum['artifact_id']);
-            $sheet->setCellValue('C' . $row, $datum['tanggal_aduan']);
-            $sheet->setCellValue('D' . $row, $datum['nama_pengadu']);
-            $sheet->setCellValue('E' . $row, $datum['title_aduan']);
-            $sheet->setCellValue('F' . $row, $datum['ext']);
-            $sheet->setCellValue('G' . $row, $datum['tempat_aduan']);
-            $sheet->setCellValue('H' . $row, $datum['PIC']);
-            $sheet->setCellValue('I' . $row, $datum['Koordinator']);
-            $sheet->setCellValue('J' . $row, $datum['Status']);
-            if ($datum['Status'] == 2 || $datum['Status'] == 3) {
-                $sheet->setCellValue('K' . $row, 'belum selesai');
-            } else {
-                $sheet->setCellValue('K' . $row, $datum['Umur_aduan']);
-            }
-            $sheet->setCellValue('L' . $row, $datum['Keterangan']);
-            $sheet->setCellValue('M' . $row, $datum['Hasil_konfrimasi_teknisi']);
-            $sheet->setCellValue('N' . $row, $datum['Teknisi_penindaklanjut_aduan']);
-
-            // Align columns
-            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('B' . $row . ':N' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $sheet->getStyle('A' . $row . ':N' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-            $row++;
+        if (!$exportAll) {
+            $filteredSql .= " AND DATE(da.tanggal_aduan) BETWEEN ? AND ?";
+            $filteredParams = [$statusId, $startDate, $endDate];
+        } else {
+            $filteredParams = [$statusId];
         }
-        $row += 2; // Add some spacing before the next status
-    }
 
-    // Remove default sheet created by PhpSpreadsheet
-    $spreadsheet->removeSheetByIndex(0);
+        $filteredStmt = $pdo->prepare($filteredSql);
+        $filteredStmt->execute($filteredParams);
+        $filteredData = $filteredStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Auto-size columns for all sheets
-    foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
+        // Fill data rows
+        $rowIndex = 13;
+        foreach ($filteredData as $index => $row) {
+            $sheet->setCellValue('A' . $rowIndex, $index + 1);
+            $sheet->setCellValue('B' . $rowIndex, $row['artifact_id']);
+            $sheet->setCellValue('C' . $rowIndex, $row['tanggal_aduan']);
+            $sheet->setCellValue('D' . $rowIndex, $row['nama_pengadu']);
+            $sheet->setCellValue('E' . $rowIndex, $row['title_aduan']);
+            $sheet->setCellValue('F' . $rowIndex, $row['ext']);
+            $sheet->setCellValue('G' . $rowIndex, $row['tempat_aduan']);
+            $sheet->setCellValue('H' . $rowIndex, $row['pic_name']);
+            $sheet->setCellValue('I' . $rowIndex, $row['koordinator_name']);
+            $sheet->setCellValue('J' . $rowIndex, $row['status_description']);
+            $sheet->setCellValue('K' . $rowIndex, $row['Umur_aduan']);
+            $sheet->setCellValue('L' . $rowIndex, $row['Keterangan']);
+            $sheet->setCellValue('M' . $rowIndex, $row['Hasil_konfrimasi_teknisi']);
+            $sheet->setCellValue('N' . $rowIndex, $row['Teknisi_penindaklanjut_aduan']);
+
+            $rowIndex++;
+        }
+
+        $sheet->getStyle('A12:N' . ($rowIndex - 1))->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // Auto-size columns
         foreach (range('A', 'N') as $columnID) {
-            $worksheet->getColumnDimension($columnID)->setAutoSize(true);
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
     }
 
-    // Align cells to the top for all sheets
-    foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
-        $worksheet->getStyle('A1:N' . $worksheet->getHighestRow())->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+    // Remove default worksheet if exists
+    if ($spreadsheet->getSheetCount() > 1) {
+        $spreadsheet->removeSheetByIndex(0);
     }
 
     // Generate dynamic filename
-    $filename = sprintf('report_periode_%s_to_%s.xlsx', $startDate, $endDate);
+    $filename = isset($_GET['export_all']) ? 'report_all_data.xlsx' : sprintf('report_periode_%s_to_%s.xlsx', $startDate, $endDate);
 
     // Set headers to force download
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header("Content-Disposition: attachment;filename=\"$filename\"");
     header('Cache-Control: max-age=0');
 
     // Save the spreadsheet to output
     $writer = new Xlsx($spreadsheet);
     $writer->save('php://output');
-    exit;
+    exit();
 }
 
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
@@ -369,12 +410,15 @@ $aduan = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </form>
 
                 <!-- Export Form -->
-                <form method="GET" action="" class="my-6 bg-white border border-gray-200 rounded-lg p-4">
+                <form method="GET" action="">
                     <input type="hidden" name="key" value="<?php echo htmlspecialchars($token); ?>">
                     <input type="hidden" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
                     <input type="hidden" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
                     <button type="submit" name="export" class="bg-green-500 text-white px-4 py-2 rounded-lg focus:outline-none hover:bg-green-600 transition-colors">
                         Export to Excel
+                    </button>
+                    <button type="submit" name="export_all" class="bg-blue-500 text-white px-4 py-2 rounded-lg focus:outline-none hover:bg-blue-600 transition-colors">
+                        Export All Data
                     </button>
                 </form>
 
@@ -430,6 +474,14 @@ $aduan = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </main>
     <script src="headerjs"></script>
+    <script>
+        function clearDateFilters() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('start_date');
+            url.searchParams.delete('end_date');
+            window.location.href = url.toString();
+        }
+    </script>
 </body>
 
 </html>

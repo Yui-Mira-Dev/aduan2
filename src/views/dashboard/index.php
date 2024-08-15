@@ -155,6 +155,73 @@ $latest_aduan = $stmt->fetchColumn();
 
 // Generate the next artifact_id
 $next_artifact_id = $latest_aduan ? $latest_aduan + 1 : 1000;
+
+$selectedMonth = isset($_GET['month']) ? $_GET['month'] : '';
+$selectedYear = isset($_GET['year']) ? $_GET['year'] : '';
+$sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'pending';
+
+// Filter data berdasarkan bulan dan tahun yang dipilih
+$filteredAduans = array_filter($aduans, function ($aduan) use ($selectedMonth, $selectedYear) {
+    $aduanMonth = date('m', strtotime($aduan['tanggal_aduan']));
+    $aduanYear = date('Y', strtotime($aduan['tanggal_aduan']));
+
+    $isMonthMatch = !$selectedMonth || $aduanMonth == $selectedMonth;
+    $isYearMatch = !$selectedYear || $aduanYear == $selectedYear;
+
+    return $isMonthMatch && $isYearMatch;
+});
+
+// Pisahkan keluhan berdasarkan status
+$inProgressAduans = array_filter($filteredAduans, fn($aduan) => $aduan['Status'] == 2);
+$pendingAduans = array_filter($filteredAduans, fn($aduan) => $aduan['Status'] == 3);
+
+// Gabungkan array berdasarkan pilihan sorting
+if ($sortOrder === 'pending') {
+    $sortedAduans = array_merge($pendingAduans, $inProgressAduans);
+} else {
+    $sortedAduans = array_merge($inProgressAduans, $pendingAduans);
+}
+
+// URL with token
+$urlWithToken = 'dashboard?key=' . urlencode($_SESSION['token']);
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+$whereClauses = ["Status != 1"];
+$params = [];
+
+if (isset($_GET['month']) && $_GET['month'] !== '') {
+    $whereClauses[] = "MONTH(tanggal_aduan) = :month";
+    $params[':month'] = $_GET['month'];
+}
+
+if (isset($_GET['year']) && $_GET['year'] !== '') {
+    $whereClauses[] = "YEAR(tanggal_aduan) = :year";
+    $params[':year'] = $_GET['year'];
+}
+
+$whereSql = implode(' AND ', $whereClauses);
+
+// Hitung total data yang sesuai dengan filter
+$sql = "SELECT COUNT(*) FROM daftar_aduan WHERE $whereSql";
+$stmt = $pdo->prepare($sql);
+foreach ($params as $param => $value) {
+    $stmt->bindValue($param, $value);
+}
+$stmt->execute();
+$total_complaints = $stmt->fetchColumn();
+
+$total_pages = ceil($total_complaints / $complaints_per_page);
+
+$sql = "SELECT * FROM daftar_aduan WHERE $whereSql ORDER BY $orderBy LIMIT :limit OFFSET :offset";
+$stmt = $pdo->prepare($sql);
+
+foreach ($params as $param => $value) {
+    $stmt->bindValue($param, $value);
+}
+$stmt->bindValue(':limit', $complaints_per_page, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>

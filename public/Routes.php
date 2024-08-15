@@ -25,6 +25,10 @@ $router->map('GET', '/', function () {
     require '../src/views/login/index.php';
 });
 
+$router->map('GET', '/index', function () {
+    require '../src/views/login/index.php';
+});
+
 $router->map('GET|POST', '/proses_login', function () use ($pdo) {
     require '../src/controllers/AuthController.php';
 });

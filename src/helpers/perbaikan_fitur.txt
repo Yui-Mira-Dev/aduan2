@@ -8,6 +8,6 @@ menambah boderder bawah pada dashboard dkk !!done ✅ 14/agus/2024 ○( ＾皿�
 mengubah tabel status compleate jadi bewarna atau hitam dan putih !!menunggu confimasi ✳️ 
 pada excel di bagian pending dan in-compleate maka umur aduannya di ubah jadi belum selesai !!done ✅ 14/agus/2024 ○( ＾皿＾)っ Hehehe…
 pada bagian dashboard data pertama yang di munculkan itu pending  !!done ✅ 14/agus/2024 ○( ＾皿＾)っ Hehehe…
-pada bagian dashboard datanya bisa di cari sesuai bulan !! ❎ (ノへ￣、) 
+pada bagian dashboard datanya bisa di cari sesuai bulan !!done ✅ 15/agus/2024 ヾ(≧▽≦*)o
 pada bagian dashboard data yang di tampilkan itu kalau pending maka pending saja !! ❎ (ノへ￣、) 
-pada compleate status bisa mendownload semua data !! ❎ (ノへ￣、) 
+pada compleate status bisa mendownload semua data !!done ✅ 15/agus/2024 q(≧▽≦q)
