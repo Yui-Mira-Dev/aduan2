@@ -1,0 +1,13 @@
+26/7/2024
+id aduan di exel = ubah jadi no 1++ !!!done ✅
+ubah kode aduan jadi artifact id !!!done ✅
+umur aduan ubah jangan ada second-nya !!!done ✅
+
+6/8/2024
+menambah boderder bawah pada dashboard dkk !!done ✅ 14/agus/2024 ○( ＾皿＾)っ Hehehe…
+mengubah tabel status compleate jadi bewarna atau hitam dan putih !!menunggu confimasi ✳️ 
+pada excel di bagian pending dan in-compleate maka umur aduannya di ubah jadi belum selesai !!done ✅ 14/agus/2024 ○( ＾皿＾)っ Hehehe…
+pada bagian dashboard data pertama yang di munculkan itu pending  !!done ✅ 14/agus/2024 ○( ＾皿＾)っ Hehehe…
+pada bagian dashboard datanya bisa di cari sesuai bulan !! ❎ (ノへ￣、) 
+pada bagian dashboard data yang di tampilkan itu kalau pending maka pending saja !! ❎ (ノへ￣、) 
+pada compleate status bisa mendownload semua data !! ❎ (ノへ￣、) 

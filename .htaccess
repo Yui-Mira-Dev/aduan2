@@ -1,0 +1,37 @@
+Options +FollowSymLinks -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    
+    # Redirect the root URL to public/index.php
+    RewriteRule ^$ public/Routes.php [L]
+
+    # RewriteCond %{HTTP_HOST} ^www\.yui\.my\.id$ [NC]
+    # RewriteRule ^(.*)$ https://yui.my.id/$1 [L,R=301]
+
+    # Style and scripts
+    RewriteRule ^headercss$ src/assets/css/header.css [L]
+    RewriteRule ^logincss$ src/assets/css/login.css [L]
+    RewriteRule ^picmaincss$ src/assets/css/picmain.css [L]
+    RewriteRule ^loginjs$ src/assets/js/login.js [L]
+    RewriteRule ^headerjs$ src/assets/js/header.js [L]
+    RewriteRule ^picmainjs$ src/assets/js/picmain.js [L]
+    RewriteRule ^StatusComplete$ src/assets/js/StatusComplete.js [L]
+
+    # Utils
+    RewriteRule ^logopusri$ src/assets/images/pusri_logo/Logo_Emblem_Pusri_Dark.png [L]
+    RewriteRule ^sabimg1$ src/assets/images/a/sab11.jpg [L]
+    RewriteRule ^deeimg$ src/assets/images/a/dee.jpg [L]
+
+    # Menambahkan aturan untuk melindungi file
+    RewriteRule ^config$ - [F]
+
+    # Redirect all other requests to public/Routes.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/Routes.php [L]
+</IfModule>
+
+# Set 403 Forbidden error document
+ErrorDocument 403 /src/views/errors/404.php
+ErrorDocument 404 /src/views/errors/404.php

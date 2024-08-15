@@ -1,0 +1,3 @@
+ada bug di dashboad yang mana di btnnya kalau kita next page maka pagenya gak sesuai (bug fix 24 juli 2024 15.56s)
+
+
