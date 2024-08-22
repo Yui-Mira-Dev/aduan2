@@ -8,3 +8,8 @@ function openEditModal(id_pic, kode_pic, nama_pic) {
 function closeEditModal() {
     document.getElementById('editModal').style.display = "none";
 }
+
+function toggleSubMenu(subMenuId) {
+    const subMenu = document.getElementById(subMenuId);
+    subMenu.classList.toggle('hidden');
+}

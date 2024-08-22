@@ -17,6 +17,7 @@ Options +FollowSymLinks -Indexes
     RewriteRule ^headerjs$ src/assets/js/header.js [L]
     RewriteRule ^picmainjs$ src/assets/js/picmain.js [L]
     RewriteRule ^StatusComplete$ src/assets/js/StatusComplete.js [L]
+    RewriteRule ^registerjs$ src/assets/js/register.js [L]
 
     # Utils
     RewriteRule ^logopusri$ src/assets/images/pusri_logo/Logo_Emblem_Pusri_Dark.png [L]

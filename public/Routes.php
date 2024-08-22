@@ -29,6 +29,10 @@ $router->map('GET', '/index', function () {
     require '../src/views/login/index.php';
 });
 
+$router->map('GET|POST', '/register', function () use ($pdo) {
+    require '../src/views/register/index.php';
+});
+
 $router->map('GET|POST', '/proses_login', function () use ($pdo) {
     require '../src/controllers/AuthController.php';
 });
@@ -77,6 +81,11 @@ $router->map('GET|POST', '/edit_complaint', function () use ($pdo) {
 $router->map('GET|POST', '/logout', function () use ($pdo) {
     checkSession();
     require '../src/controllers/logout.php';
+});
+
+$router->map('GET|POST', '/proses_register', function () use ($pdo) {
+    checkSession();
+    require '../src/controllers/register.php';
 });
 
 // Match current request URL

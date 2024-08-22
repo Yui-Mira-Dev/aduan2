@@ -93,6 +93,9 @@ date_default_timezone_set('Asia/Jakarta');
     </main>
 
     <script src="headerjs"></script>
+    <?php
+    require_once __DIR__ . '/../../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

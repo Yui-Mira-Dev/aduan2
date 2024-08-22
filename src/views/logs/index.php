@@ -235,6 +235,9 @@ $dropdown_usernames = $pdo->query($sql_usernames)->fetchAll(PDO::FETCH_COLUMN);
 
         updateTime();
     </script>
+    <?php
+    require_once __DIR__ . '/../../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

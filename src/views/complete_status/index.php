@@ -482,6 +482,9 @@ $aduan = $stmt->fetchAll(PDO::FETCH_ASSOC);
             window.location.href = url.toString();
         }
     </script>
+    <?php
+    require_once __DIR__ . '/../../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

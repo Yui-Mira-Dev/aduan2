@@ -1,58 +1,58 @@
-<h3 class="text-lg font-bold mt-8">Add New Complaint</h3>
-<button id="toggleModal" class="bg-blue-500 text-white px-4 py-2 rounded">Add New Complaint</button>
-<h3 class="text-lg font-bold mt-8">Existing Complaints</h3>
+<!-- Kelompok Box 1 -->
+<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold mb-4">Add New Complaint</h3>
+    <button id="toggleModal" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition">Add New Complaint</button>
+</div>
 
-<div class="mb-4">
-    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex space-x-2">
-        <!-- Menyimpan nilai halaman saat ini -->
+<!-- Kelompok Box 2 -->
+<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold mb-4">Existing Complaints</h3>
+    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 items-center">
         <input type="hidden" name="page" value="<?php echo htmlspecialchars($current_page); ?>">
-
-        <!-- Menyimpan nilai filter bulan jika ada -->
         <input type="hidden" name="month" value="<?php echo htmlspecialchars($selectedMonth); ?>">
-
-        <!-- Menyimpan nilai filter tahun jika ada -->
         <input type="hidden" name="year" value="<?php echo htmlspecialchars($selectedYear); ?>">
 
-        <!-- Tombol untuk menyortir berdasarkan status pending -->
-        <button type="submit" name="sort" value="pending" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">
+        <button type="submit" name="sort" value="pending" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition w-full sm:w-auto mb-2 sm:mb-0">
             Show Pending First
         </button>
 
-        <!-- Tombol untuk menyortir berdasarkan status in-progress -->
-        <button type="submit" name="sort" value="in-progress" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm">
+        <button type="submit" name="sort" value="in-progress" class="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition w-full sm:w-auto">
             Show In-Progress First
         </button>
 
-        <!-- Menyimpan token untuk keamanan -->
         <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
     </form>
 </div>
 
+<!-- Kelompok Box 3 -->
+<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
+    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 items-center">
+        <div class="w-full sm:w-auto">
+            <select name="month" class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Month</option>
+                <?php for ($m = 1; $m <= 12; $m++) : ?>
+                    <option value="<?php echo $m; ?>" <?php if (isset($_GET['month']) && $_GET['month'] == $m) echo 'selected'; ?>>
+                        <?php echo date('F', mktime(0, 0, 0, $m, 1)); ?>
+                    </option>
+                <?php endfor; ?>
+            </select>
+        </div>
 
-<div class="mb-4">
-    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex space-x-2">
-        <select name="month" class="border border-gray-300 rounded-md">
-            <option value="">Select Month</option>
-            <?php for ($m = 1; $m <= 12; $m++) : ?>
-                <option value="<?php echo $m; ?>" <?php if (isset($_GET['month']) && $_GET['month'] == $m) echo 'selected'; ?>>
-                    <?php echo date('F', mktime(0, 0, 0, $m, 1)); ?>
-                </option>
-            <?php endfor; ?>
-        </select>
+        <div class="w-full sm:w-auto">
+            <select name="year" class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Year</option>
+                <?php
+                $startYear = date('Y') - 5;
+                $endYear = date('Y');
+                for ($y = $startYear; $y <= $endYear; $y++) : ?>
+                    <option value="<?php echo $y; ?>" <?php if (isset($_GET['year']) && $_GET['year'] == $y) echo 'selected'; ?>>
+                        <?php echo $y; ?>
+                    </option>
+                <?php endfor; ?>
+            </select>
+        </div>
 
-        <select name="year" class="border border-gray-300 rounded-md">
-            <option value="">Select Year</option>
-            <?php
-            $startYear = date('Y') - 5; // Adjust range as needed
-            $endYear = date('Y');
-            for ($y = $startYear; $y <= $endYear; $y++) : ?>
-                <option value="<?php echo $y; ?>" <?php if (isset($_GET['year']) && $_GET['year'] == $y) echo 'selected'; ?>>
-                    <?php echo $y; ?>
-                </option>
-            <?php endfor; ?>
-        </select>
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Filter</button>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition w-full sm:w-auto">Filter</button>
         <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
     </form>
 </div>
@@ -135,21 +135,6 @@
             <?php endif; ?>
         </tbody>
     </table>
-</div>
-
-<!-- Pagination -->
-<div class="mt-6 flex justify-center space-x-2 mb-10">
-    <?php if ($current_page > 1) : ?>
-        <a href="?page=<?php echo $current_page - 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Previous</a>
-    <?php endif; ?>
-
-    <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
-        <a href="?page=<?php echo $i; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-<?php echo $i == $current_page ? 'gray' : 'blue'; ?>-500 text-white px-4 py-2 rounded-md shadow-sm"><?php echo $i; ?></a>
-    <?php endfor; ?>
-
-    <?php if ($current_page < $total_pages) : ?>
-        <a href="?page=<?php echo $current_page + 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Next</a>
-    <?php endif; ?>
 </div>
 
 <!-- Modal Background -->

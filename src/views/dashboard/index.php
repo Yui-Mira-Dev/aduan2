@@ -257,6 +257,20 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     include '../src/views/components/TeknisiDashboardComponent.php'
                     ?>
                 <?php endif; ?>
+                <!-- Pagination -->
+                <div class="mt-6 flex justify-center space-x-2 mb-10">
+                    <?php if ($current_page > 1) : ?>
+                        <a href="?page=<?php echo $current_page - 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Previous</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+                        <a href="?page=<?php echo $i; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-<?php echo $i == $current_page ? 'gray' : 'blue'; ?>-500 text-white px-4 py-2 rounded-md shadow-sm"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($current_page < $total_pages) : ?>
+                        <a href="?page=<?php echo $current_page + 1; ?>&sort=<?php echo htmlspecialchars($sortOrder); ?>&month=<?php echo htmlspecialchars($selectedMonth); ?>&year=<?php echo htmlspecialchars($selectedYear); ?>&key=<?php echo htmlspecialchars($_SESSION['token']); ?>" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm">Next</a>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </main>
@@ -308,7 +322,9 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('editModal').classList.add('hidden');
         });
     </script>
-
+    <?php
+    require_once __DIR__ . '/../../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

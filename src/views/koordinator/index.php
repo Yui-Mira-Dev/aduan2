@@ -19,11 +19,7 @@ function isTokenValid($token)
     $stmt->execute([$token]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($result) {
-        return $result['id_user'];
-    } else {
-        return false;
-    }
+    return $result ? $result['id_user'] : false;
 }
 
 $token = isset($_GET['key']) ? $_GET['key'] : '';
@@ -41,21 +37,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nama_koordinator = $_POST['nama_koordinator'];
         $sql = "INSERT INTO Koordinator (kode_koordinator, nama_koordinator) VALUES (?, ?)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$kode_koordinator, $nama_koordinator]);
+        if ($stmt->execute([$kode_koordinator, $nama_koordinator])) {
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Koordinator added successfully!'];
+        } else {
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Failed to add Koordinator.'];
+        }
     } elseif (isset($_POST['update'])) {
         $id_koordinator = $_POST['id_koordinator'];
         $kode_koordinator = strtoupper($_POST['kode_koordinator']);
         $nama_koordinator = $_POST['nama_koordinator'];
         $sql = "UPDATE Koordinator SET kode_koordinator = ?, nama_koordinator = ? WHERE id_koordinator = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$kode_koordinator, $nama_koordinator, $id_koordinator]);
+        if ($stmt->execute([$kode_koordinator, $nama_koordinator, $id_koordinator])) {
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Koordinator updated successfully!'];
+        } else {
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Failed to update Koordinator.'];
+        }
     } elseif (isset($_POST['delete'])) {
         $id_koordinator = $_POST['id_koordinator'];
         $sql = "DELETE FROM Koordinator WHERE id_koordinator = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$id_koordinator]);
+        if ($stmt->execute([$id_koordinator])) {
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Koordinator deleted successfully!'];
+        } else {
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Failed to delete Koordinator.'];
+        }
     }
 
+    // Redirect to avoid form resubmission
     header('Location: koordinator?key=' . urlencode($token));
     exit();
 }
@@ -63,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $sql = "SELECT * FROM Koordinator";
 $stmt = $pdo->query($sql);
 $koordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
 <!DOCTYPE html>
@@ -78,12 +86,59 @@ $koordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="headercss">
     <link rel="stylesheet" href="picmaincss">
+    <style>
+        .opacity-0 {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #flashMessage {
+            z-index: 9999 !important;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            max-width: 400px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #flashMessage.success {
+            background-color: #48bb78;
+            color: #fff;
+        }
+
+        #flashMessage.error {
+            background-color: #f56565;
+            color: #fff;
+        }
+
+        #flashMessage svg {
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
 
     <?php
     include __DIR__ . '/../components/header.php';
+
+    if (isset($_SESSION['flash_message'])) {
+        $flash = $_SESSION['flash_message'];
+        $flashClass = $flash['type'] === 'success' ? 'success' : 'error';
+        $icon = $flash['type'] === 'success' ? '<svg class="inline w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : '<svg class="inline w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        echo "<div id='flashMessage' class='$flashClass'>
+            $icon {$flash['message']}
+        </div>";
+        unset($_SESSION['flash_message']);
+    }
     ?>
 
     <main class="content-wrapper transition-all duration-300 ease-in-out ml-0 mt-10 lg:ml-64">
@@ -120,7 +175,6 @@ $koordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                         </thead>
                         <tbody>
-
                             <?php
                             $counter = 1;
                             foreach ($koordinators as $koordinator) : ?>
@@ -180,7 +234,23 @@ $koordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
         function confirmDelete() {
             return confirm('Are you sure you want to delete this Koordinator?');
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessage = document.getElementById('flashMessage');
+            if (flashMessage) {
+                // Fade out the message after 3 seconds
+                setTimeout(() => {
+                    flashMessage.classList.add('opacity-0');
+                    setTimeout(() => {
+                        flashMessage.remove();
+                    }, 300); // Match this duration with the CSS transition
+                }, 3000);
+            }
+        });
     </script>
+    <?php
+    require_once __DIR__ . '/../../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

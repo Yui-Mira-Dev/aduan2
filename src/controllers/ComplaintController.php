@@ -177,6 +177,10 @@ $statuses = $pdo->query("SELECT id_status, description FROM status")->fetchAll(P
             </form>
         </div>
     </main>
+    <script src="headerjs"></script>
+    <?php
+    require_once __DIR__ . '/../assets/js/manualjs.html';
+    ?>
 </body>
 
 </html>

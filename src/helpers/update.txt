@@ -1,0 +1,2 @@
+menambah fitur notif pada log dan koordinator
+menambah halaman untuk regsiter
