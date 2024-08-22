@@ -78,6 +78,11 @@ $router->map('GET|POST', '/edit_complaint', function () use ($pdo) {
     require '../src/controllers/ComplaintController.php';
 });
 
+$router->map('GET|POST', '/update_complaint', function () use ($pdo) {
+    checkSession();
+    require '../src/controllers/UpdateComplaint.php';
+});
+
 $router->map('GET|POST', '/logout', function () use ($pdo) {
     checkSession();
     require '../src/controllers/logout.php';
