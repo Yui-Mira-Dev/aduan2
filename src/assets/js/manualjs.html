@@ -3,4 +3,8 @@
         const subMenu = document.getElementById(subMenuId);
         subMenu.classList.toggle('hidden');
     }
+    function validateInput(input) {
+    // Remove any characters that are not digits or slashes
+    input.value = input.value.replace(/[^0-9/]/g, '');
+}
 </script>

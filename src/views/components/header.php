@@ -42,7 +42,7 @@
                     <i class="bi bi-check-circle-fill text-lg mr-2"></i> Complete Status
                 </a>
             </li>
-            <?php if ($_SESSION['role'] !== 'teknisi') : ?>
+            <?php if ($_SESSION['role'] !== 'teknisi' && $_SESSION['role'] !== 'deskjob') : ?>
                 <li class="mb-4">
                     <a href="logs?key=<?php echo urlencode($_SESSION['token']); ?>" class="flex items-center">
                         <i class="bi bi-journal-text text-lg mr-2"></i> Logs
@@ -50,7 +50,7 @@
                 </li>
                 <li class="mb-4">
                     <a href="register?key=<?php echo urlencode($_SESSION['token']); ?>" class="flex items-center">
-                        <i class="bi bi-person-add  text-lg mr-2"></i> Regsiter
+                        <i class="bi bi-person-add  text-lg mr-2"></i> Register
                     </a>
                 </li>
             <?php endif; ?>

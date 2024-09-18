@@ -186,8 +186,16 @@ if ($sortOrder === 'pending') {
 $urlWithToken = 'dashboard?key=' . urlencode($_SESSION['token']);
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-$whereClauses = ["Status != 1"];
-$params = [];
+// Filter data berdasarkan status yang dipilih
+$selectedStatus = '';
+if ($sortOrder === 'pending') {
+    $selectedStatus = 3; // Status 'pending'
+} elseif ($sortOrder === 'in-progress') {
+    $selectedStatus = 2; // Status 'in-progress'
+}
+
+$whereClauses = ["Status = :status", "Status != 1"];
+$params = [':status' => $selectedStatus];
 
 if (isset($_GET['month']) && $_GET['month'] !== '') {
     $whereClauses[] = "MONTH(tanggal_aduan) = :month";
@@ -212,6 +220,7 @@ $total_complaints = $stmt->fetchColumn();
 
 $total_pages = ceil($total_complaints / $complaints_per_page);
 
+// Fetch data sesuai dengan filter dan sorting
 $sql = "SELECT * FROM daftar_aduan WHERE $whereSql ORDER BY $orderBy LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($sql);
 
@@ -234,6 +243,7 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="icon" href="logopusri">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="headercss">
 </head>
 
@@ -247,7 +257,7 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white">
                 <div class="loading-spinner"></div>
             </div>
-            <div div class="p-8 mt-20" id="content">
+            <div div class="p-8 mt-10" id="content">
                 <?php if ($_SESSION['role'] !== 'teknisi') : ?>
                     <?php
                     include '../src/views/components/DeskjobDashboardComponent.php'
@@ -321,6 +331,11 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('closeEditModal').addEventListener('click', () => {
             document.getElementById('editModal').classList.add('hidden');
         });
+
+        function validateInput(input) {
+            // Remove any characters that are not digits or slashes
+            input.value = input.value.replace(/[^0-9/]/g, '');
+        }
     </script>
     <?php
     require_once __DIR__ . '/../../assets/js/manualjs.html';

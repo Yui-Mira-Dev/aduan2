@@ -188,7 +188,7 @@ if (isset($_GET['export']) || isset($_GET['export_all'])) {
         $sheet->setCellValue('C12', 'Tanggal Aduan');
         $sheet->setCellValue('D12', 'Nama Pengadu');
         $sheet->setCellValue('E12', 'Title Aduan');
-        $sheet->setCellValue('F12', 'Ext');
+        $sheet->setCellValue('F12', 'Ext/No TLP');
         $sheet->setCellValue('G12', 'Tempat Aduan');
         $sheet->setCellValue('H12', 'PIC');
         $sheet->setCellValue('I12', 'Koordinator');
@@ -251,13 +251,21 @@ if (isset($_GET['export']) || isset($_GET['export_all'])) {
             $sheet->setCellValue('H' . $rowIndex, $row['pic_name']);
             $sheet->setCellValue('I' . $rowIndex, $row['koordinator_name']);
             $sheet->setCellValue('J' . $rowIndex, $row['status_description']);
-            $sheet->setCellValue('K' . $rowIndex, $row['Umur_aduan']);
+
+            // Display "Belum Selesai" for statuses Pending and In Progress
+            if ($row['Status'] == 2 || $row['Status'] == 3) {
+                $sheet->setCellValue('K' . $rowIndex, 'Belum Selesai');
+            } else {
+                $sheet->setCellValue('K' . $rowIndex, $row['Umur_aduan']);
+            }
+
             $sheet->setCellValue('L' . $rowIndex, $row['Keterangan']);
             $sheet->setCellValue('M' . $rowIndex, $row['Hasil_konfrimasi_teknisi']);
             $sheet->setCellValue('N' . $rowIndex, $row['Teknisi_penindaklanjut_aduan']);
 
             $rowIndex++;
         }
+
 
         $sheet->getStyle('A12:N' . ($rowIndex - 1))->applyFromArray([
             'borders' => [

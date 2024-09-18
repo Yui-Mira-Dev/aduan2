@@ -129,8 +129,12 @@ $statuses = $pdo->query("SELECT id_status, description FROM status")->fetchAll(P
                         <input type="text" id="title_aduan" name="title_aduan" value="<?php echo htmlspecialchars($aduan['title_aduan']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                     </div>
                     <div>
-                        <label for="ext" class="block text-gray-700 text-sm font-semibold mb-2">Ext:</label>
-                        <input type="text" id="ext" name="ext" value="<?php echo htmlspecialchars($aduan['ext']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="ext" class="block text-gray-700 text-sm font-semibold mb-2">Ext/No TLP:</label>
+                        <input type="text" id="ext" name="ext" value="<?php echo htmlspecialchars($aduan['ext']); ?>"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            pattern="[0-9/]*" inputmode="text"
+                            title="Hanya angka dan simbol / yang diperbolehkan"
+                            oninput="validateInput(this)">
                     </div>
                 </div>
                 <div class="mb-4">

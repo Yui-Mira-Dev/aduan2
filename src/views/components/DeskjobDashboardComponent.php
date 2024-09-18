@@ -1,34 +1,42 @@
-<!-- Kelompok Box 1 -->
-<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
-    <h3 class="text-xl font-semibold mb-4">Add New Complaint</h3>
-    <button id="toggleModal" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition">Add New Complaint</button>
+<!-- Flex Container for Side-by-Side Layout -->
+<div class="flex flex-col sm:flex-row sm:space-x-4 bg-gray-100 p-4 rounded-lg shadow-sm">
+
+    <!-- Kelompok Box 1: Add New Complaint -->
+    <div class="flex-1 mb-4 sm:mb-0 p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">Add New Complaint</h3>
+        <button id="toggleModal" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition">
+            Add New Complaint
+        </button>
+    </div>
+
+    <!-- Kelompok Box 2: Existing Complaints -->
+    <div class="flex-1 p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">Existing Complaints</h3>
+        <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-wrap space-y-3 sm:space-y-0 sm:space-x-4 items-center">
+            <input type="hidden" name="page" value="<?php echo htmlspecialchars($current_page); ?>">
+            <input type="hidden" name="month" value="<?php echo htmlspecialchars($selectedMonth); ?>">
+            <input type="hidden" name="year" value="<?php echo htmlspecialchars($selectedYear); ?>">
+
+            <button type="submit" name="sort" value="pending" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition w-full sm:w-auto">
+                Show Pending
+            </button>
+
+            <button type="submit" name="sort" value="in-progress" class="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition w-full sm:w-auto">
+                Show In-Progress
+            </button>
+
+            <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
+        </form>
+    </div>
 </div>
 
-<!-- Kelompok Box 2 -->
-<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
-    <h3 class="text-xl font-semibold mb-4">Existing Complaints</h3>
-    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 items-center">
-        <input type="hidden" name="page" value="<?php echo htmlspecialchars($current_page); ?>">
-        <input type="hidden" name="month" value="<?php echo htmlspecialchars($selectedMonth); ?>">
-        <input type="hidden" name="year" value="<?php echo htmlspecialchars($selectedYear); ?>">
+<!-- Kelompok Box 3: Slim Filter Form with Mobile Optimization -->
+<div class="mt-4 flex justify-center items-center mb-3">
+    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 items-center w-full">
 
-        <button type="submit" name="sort" value="pending" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition w-full sm:w-auto mb-2 sm:mb-0">
-            Show Pending First
-        </button>
-
-        <button type="submit" name="sort" value="in-progress" class="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700 transition w-full sm:w-auto">
-            Show In-Progress First
-        </button>
-
-        <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
-    </form>
-</div>
-
-<!-- Kelompok Box 3 -->
-<div class="mb-6 p-4 border border-white rounded-lg shadow-md">
-    <form method="GET" action="<?php echo htmlspecialchars($urlWithToken); ?>" class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 items-center">
+        <!-- Month Selector -->
         <div class="w-full sm:w-auto">
-            <select name="month" class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="month" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Month</option>
                 <?php for ($m = 1; $m <= 12; $m++) : ?>
                     <option value="<?php echo $m; ?>" <?php if (isset($_GET['month']) && $_GET['month'] == $m) echo 'selected'; ?>>
@@ -38,8 +46,9 @@
             </select>
         </div>
 
+        <!-- Year Selector -->
         <div class="w-full sm:w-auto">
-            <select name="year" class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="year" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Year</option>
                 <?php
                 $startYear = date('Y') - 5;
@@ -52,7 +61,11 @@
             </select>
         </div>
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition w-full sm:w-auto">Filter</button>
+        <!-- Submit Button -->
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full sm:w-auto">
+            Filter
+        </button>
+
         <input type="hidden" name="key" value="<?php echo htmlspecialchars($_SESSION['token']); ?>">
     </form>
 </div>
@@ -156,8 +169,12 @@
                     <input type="text" id="title_aduan" name="title_aduan" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
                 <div class="mb-4">
-                    <label for="ext" class="block text-gray-700 text-sm font-bold mb-2">Ext:</label>
-                    <input type="text" id="ext" name="ext" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <label for="ext" class="block text-gray-700 text-sm font-bold mb-2">Ext/No TLP:</label>
+                    <input type="text" id="ext" name="ext"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        pattern="[0-9/]*" inputmode="text"
+                        title="Hanya angka dan simbol / yang diperbolehkan" required
+                        oninput="validateInput(this)">
                 </div>
                 <div class="mb-4">
                     <label for="tempat_aduan" class="block text-gray-700 text-sm font-bold mb-2">Tempat Aduan:</label>
