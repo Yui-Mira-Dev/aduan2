@@ -6,9 +6,6 @@ Options +FollowSymLinks -Indexes
     # Redirect the root URL to public/index.php
     RewriteRule ^$ public/Routes.php [L]
 
-    # RewriteCond %{HTTP_HOST} ^www\.yui\.my\.id$ [NC]
-    # RewriteRule ^(.*)$ https://yui.my.id/$1 [L,R=301]
-
     # Style and scripts
     RewriteRule ^headercss$ src/assets/css/header.css [L]
     RewriteRule ^logincss$ src/assets/css/login.css [L]
@@ -32,6 +29,11 @@ Options +FollowSymLinks -Indexes
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/Routes.php [L]
 </IfModule>
+
+# Blokir akses ke file sensitif
+<FilesMatch "(\.env|composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
 
 # Set 403 Forbidden error document
 ErrorDocument 403 /src/views/errors/404.php

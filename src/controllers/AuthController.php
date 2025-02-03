@@ -123,10 +123,10 @@ if ($user) {
         header('Location: dashboard?key=' . $token);
         exit();
     } else {
-        header('Location: /');
-        echo "Invalid password";
+        header('Location: /aduan2/?error=invalid_password');
+        exit();
     }
 } else {
-    header('Location: /');
-    echo "User not found";
+    header('Location: /aduan2/?error=user_not_found');
+    exit();
 }

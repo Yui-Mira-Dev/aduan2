@@ -1,4 +1,7 @@
-<div class="navbar bg-white">
+<div class="navbar bg-white flex items-center">
+    <div class="dashboard-role font-bold text-lg" style="margin-left: 200px;"> <!-- Custom margin-left -->
+        Dashboard <?php echo htmlspecialchars($_SESSION['role']); ?>
+    </div>
     <div class="user-info relative ml-auto text-gray-900"> <!-- Added text-gray-900 for dark text -->
         <div class="username font-bold text-lg" id="toggleUserInfo">
             <?php echo htmlspecialchars($_SESSION['username']); ?> <i class="bi bi-person p-2 text-lg"></i>

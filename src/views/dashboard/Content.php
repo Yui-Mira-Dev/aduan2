@@ -260,11 +260,11 @@ $aduans = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div div class="p-8 mt-10" id="content">
                 <?php if ($_SESSION['role'] !== 'teknisi') : ?>
                     <?php
-                    include '../src/views/components/DeskjobDashboardComponent.php'
+                    include '../src/views/components/DeskjobDashboardContent.php'
                     ?>
                 <?php elseif ($_SESSION['role'] !== 'deskjob') : ?>
                     <?php
-                    include '../src/views/components/TeknisiDashboardComponent.php'
+                    include '../src/views/components/TeknisiDashboardContent.php'
                     ?>
                 <?php endif; ?>
 

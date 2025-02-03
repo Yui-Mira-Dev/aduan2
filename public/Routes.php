@@ -43,6 +43,12 @@ $router->map('GET|POST', '/dashboard', function () use ($pdo) {
     require '../src/views/dashboard/index.php';
 });
 
+// Views routes with session check
+$router->map('GET|POST', '/dashboardcontent', function () use ($pdo) {
+    checkSession();
+    require '../src/views/dashboard/Content.php';
+});
+
 $router->map('GET|POST', '/koordinator', function () use ($pdo) {
     checkSession();
     require '../src/views/koordinator/index.php';
